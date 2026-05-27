@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f1923">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Horas">
+<link rel="manifest" href="manifest.json">
+<title>Registro de Horas 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b1017;
+    --surface: #141c25;
+    --surface2: #1a2535;
+    --border: #1e2d3d;
+    --accent: #00d4aa;
+    --accent2: #ff6b35;
+    --accent3: #4a9eff;
+    --text: #e8edf2;
+    --text2: #7a8fa0;
+    --text3: #4a5f72;
+    --danger: #ff4757;
+    --holiday: #ffd32a;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  header h1 {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .header-year {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  /* ─── MONTH NAV ─── */
+  .month-nav {
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .month-nav::-webkit-scrollbar { display: none; }
+  .month-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .month-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+    font-weight: 700;
+  }
+  .month-btn:hover:not(.active) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ─── SUMMARY CARDS ─── */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 14px 16px;
+  }
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .summary-card.card-total::before { background: var(--accent3); }
+  .summary-card.card-objetivo::before { background: var(--text3); }
+  .summary-card.card-extra::before { background: var(--accent2); }
+  .summary-card.card-festivas::before { background: var(--holiday); }
+  .summary-card .label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 6px;
+  }
+  .summary-card .value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .summary-card.card-extra .value { color: var(--accent2); }
+  .summary-card.card-festivas .value { color: var(--holiday); }
+  .summary-card .sub {
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+
+  /* ─── HORAS LABORABLES SETTINGS ─── */
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+  .settings-row label {
+    font-size: 12px;
+    color: var(--text2);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .settings-row input[type="number"] {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    width: 80px;
+    text-align: center;
+  }
+  .settings-row input[type="number"]:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  /* ─── DAY LIST ─── */
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 14px 16px 8px;
+  }
+
+  .day-list {
+    padding: 0 16px 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .day-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 56px 1fr 1fr 64px 28px;
+    gap: 8px;
+    align-items: center;
+    transition: border-color 0.15s;
+    position: relative;
+  }
+  .day-card.has-data {
+    border-color: rgba(0,212,170,0.25);
+    background: linear-gradient(135deg, var(--surface), #131e2a);
+  }
+  .day-card.is-holiday {
+    border-color: rgba(255,211,42,0.3);
+    background: linear-gradient(135deg, var(--surface), #1a1a10);
+  }
+  .day-card.is-weekend {
+    opacity: 0.5;
+  }
+  .day-card.today {
+    border-color: var(--accent3);
+    box-shadow: 0 0 0 1px rgba(74,158,255,0.2);
+  }
+
+  .day-date {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+    line-height: 1.4;
+  }
+  .day-date .weekday {
+    font-size: 9px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .day-date .day-num {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .time-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 8px 6px;
+    border-radius: var(--radius-sm);
+    width: 100%;
+    text-align: center;
+    -webkit-appearance: none;
+  }
+  .time-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #0f1923;
+  }
+  .time-input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+    width: 16px;
+  }
+
+  .day-total {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text3);
+  }
+  .day-total.has-hours { color: var(--accent); }
+  .day-total.is-holiday-h { color: var(--holiday); }
+
+  .holiday-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    color: var(--text3);
+  }
+  .holiday-btn.active {
+    background: rgba(255,211,42,0.15);
+    border-color: var(--holiday);
+    color: var(--holiday);
+  }
+
+  /* ─── FAB EXPORT ─── */
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 16px;
+    padding: 14px 20px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(0,212,170,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+    z-index: 50;
+  }
+  .fab:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 10px rgba(0,212,170,0.2);
+  }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    width: 100%;
+    max-height: 80dvh;
+    overflow-y: auto;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--accent);
+  }
+  .export-section {
+    background: var(--bg);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.8;
+    color: var(--text2);
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .btn {
+    flex: 1;
+    padding: 13px;
+    border-radius: var(--radius);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s;
+  }
+  .btn:active { opacity: 0.8; }
+  .btn-primary { background: var(--accent); color: var(--bg); }
+  .btn-secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+  /* ─── INSTALL BANNER ─── */
+  .install-banner {
+    display: none;
+    background: linear-gradient(135deg, #0f2027, #203a43);
+    border: 1px solid var(--accent3);
+    border-radius: var(--radius);
+    margin: 10px 16px;
+    padding: 14px;
+    align-items: center;
+    gap: 12px;
+  }
+  .install-banner.show { display: flex; }
+  .install-banner p { font-size: 12px; color: var(--text2); flex: 1; }
+  .install-banner strong { color: var(--text); display: block; font-size: 13px; margin-bottom: 2px; }
+  .install-btn {
+    background: var(--accent3);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-wrap {
+    padding: 0 16px 4px;
+  }
+  .progress-bar-bg {
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 4px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--accent);
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+
+  input[type="time"] { color-scheme: dark; }
+  input[type="number"] { color-scheme: dark; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⏱ Registro Horas</h1>
+  <span class="header-year" id="currentYear">2026</span>
+</header>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="installBanner">
+  <div style="flex:1">
+    <strong>Instalar app</strong>
+    <p>Añade esta app a tu pantalla de inicio</p>
+  </div>
+  <button class="install-btn" id="installBtn">Instalar</button>
+</div>
+
+<!-- MONTH NAV -->
+<div class="month-nav" id="monthNav"></div>
+
+<!-- SETTINGS ROW -->
+<div class="settings-row">
+  <label>Horas laborables del mes:</label>
+  <input type="number" id="targetHours" value="160" min="1" max="300">
+</div>
+
+<!-- SUMMARY -->
+<div class="summary">
+  <div class="summary-card card-total">
+    <div class="label">Total trabajado</div>
+    <div class="value" id="sumTotal">0:00</div>
+    <div class="sub" id="sumDays">0 días con registro</div>
+  </div>
+  <div class="summary-card card-objetivo">
+    <div class="label">Objetivo</div>
+    <div class="value" id="sumObjetivo">160h</div>
+    <div class="sub">Horas laborables</div>
+  </div>
+  <div class="summary-card card-extra">
+    <div class="label">Horas extra</div>
+    <div class="value" id="sumExtra">–</div>
+    <div class="sub">vs. objetivo</div>
+  </div>
+  <div class="summary-card card-festivas">
+    <div class="label">H. festivas</div>
+    <div class="value" id="sumFestivas">0:00</div>
+    <div class="sub">En días festivos</div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="progress-label">
+    <span id="progressPct">0%</span>
+    <span id="progressRemain">Faltan 160h</span>
+  </div>
+</div>
+
+<!-- DAY LIST -->
+<p class="section-title" id="sectionTitle">Días del mes</p>
+<div class="day-list" id="dayList"></div>
+
+<!-- FAB -->
+<button class="fab" id="exportBtn">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+  </svg>
+  Exportar
+</button>
+
+<!-- MODAL EXPORT -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <h2>Exportar registro</h2>
+    <pre class="export-section" id="exportContent"></pre>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="copyBtn">📋 Copiar</button>
+      <button class="btn btn-secondary" id="closeModal">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const WEEKDAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const YEAR = 2026;
+
+let currentMonth = new Date().getMonth();
+let data = {};
+
+// ─── STORAGE ───
+function storageKey(m) { return `horas_${YEAR}_${m}`; }
+function loadMonth(m) {
+  try { return JSON.parse(localStorage.getItem(storageKey(m)) || '{}'); }
+  catch { return {}; }
+}
+function saveMonth(m, d) {
+  localStorage.setItem(storageKey(m), JSON.stringify(d));
+}
+function loadTarget(m) {
+  return parseInt(localStorage.getItem(`target_${YEAR}_${m}`) || '160');
+}
+function saveTarget(m, v) {
+  localStorage.setItem(`target_${YEAR}_${m}`, v);
+}
+
+// ─── TIME UTILS ───
+function timeToMinutes(t) {
+  if (!t) return 0;
+  const [h, mi] = t.split(':').map(Number);
+  return h * 60 + mi;
+}
+function minutesToHHMM(min) {
+  if (min <= 0) return '0:00';
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${h}:${String(m).padStart(2,'0')}`;
+}
+function minutesToSignedHHMM(min) {
+  const sign = min < 0 ? '-' : '+';
+  const abs = Math.abs(min);
+  const h = Math.floor(abs / 60);
+  const m = abs % 60;
+  return `${sign}${h}:${String(m).padStart(2,'0')}`;
+}
+function getDaysInMonth(year, month) {
+  return new Date(year, month + 1, 0).getDate();
+}
+function isWeekend(year, month, day) {
+  const d = new Date(year, month, day).getDay();
+  return d === 0 || d === 6;
+}
+function isToday(year, month, day) {
+  const t = new Date();
+  return t.getFullYear() === year && t.getMonth() === month && t.getDate() === day;
+}
+
+// ─── RENDER MONTH NAV ───
+function renderMonthNav() {
+  const nav = document.getElementById('monthNav');
+  nav.innerHTML = MONTHS.map((m, i) =>
+    `<button class="month-btn${i === currentMonth ? ' active' : ''}" data-month="${i}">${m}</button>`
+  ).join('');
+  nav.querySelectorAll('.month-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentMonth = +btn.dataset.month;
+      renderAll();
+      btn.scrollIntoView({ inline: 'nearest', behavior: 'smooth' });
+    });
+  });
+}
+
+// ─── RENDER DAYS ───
+function renderDays() {
+  data = loadMonth(currentMonth);
+  const target = loadTarget(currentMonth);
+  document.getElementById('targetHours').value = target;
+
+  const days = getDaysInMonth(YEAR, currentMonth);
+  const list = document.getElementById('dayList');
+  document.getElementById('sectionTitle').textContent = `${MONTHS[currentMonth]} ${YEAR}`;
+
+  list.innerHTML = '';
+  for (let d = 1; d <= days; d++) {
+    const key = `${d}`;
+    const entry = data[key] || {};
+    const weekend = isWeekend(YEAR, currentMonth, d);
+    const today = isToday(YEAR, currentMonth, d);
+    const holiday = entry.holiday || false;
+    const inicio = entry.inicio || '';
+    const fin = entry.fin || '';
+    const totalMin = inicio && fin ? Math.max(0, timeToMinutes(fin) - timeToMinutes(inicio)) : 0;
+    const totalStr = totalMin > 0 ? minutesToHHMM(totalMin) : '–';
+
+    const dateObj = new Date(YEAR, currentMonth, d);
+    const weekday = WEEKDAYS[dateObj.getDay()];
+
+    const card = document.createElement('div');
+    card.className = `day-card${totalMin > 0 ? ' has-data' : ''}${holiday ? ' is-holiday' : ''}${weekend ? ' is-weekend' : ''}${today ? ' today' : ''}`;
+    card.innerHTML = `
+      <div class="day-date">
+        <div class="weekday">${weekday}</div>
+        <div class="day-num">${String(d).padStart(2,'0')}</div>
+      </div>
+      <input type="time" class="time-input" value="${inicio}" placeholder="Inicio" data-day="${d}" data-field="inicio">
+      <input type="time" class="time-input" value="${fin}" placeholder="Fin" data-day="${d}" data-field="fin">
+      <div class="day-total ${totalMin > 0 ? (holiday ? 'is-holiday-h' : 'has-hours') : ''}" id="total_${d}">${totalStr}</div>
+      <button class="holiday-btn ${holiday ? 'active' : ''}" data-day="${d}" title="Festivo">F</button>
+    `;
+    list.appendChild(card);
+  }
+
+  // Events
+  list.querySelectorAll('.time-input').forEach(inp => {
+    inp.addEventListener('change', e => {
+      const day = e.target.dataset.day;
+      const field = e.target.dataset.field;
+      if (!data[day]) data[day] = {};
+      data[day][field] = e.target.value;
+      saveMonth(currentMonth, data);
+      updateDayTotal(day);
+      updateSummary();
+    });
+  });
+  list.querySelectorAll('.holiday-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const day = e.target.dataset.day;
+      if (!data[day]) data[day] = {};
+      data[day].holiday = !data[day].holiday;
+      saveMonth(currentMonth, data);
+      renderDays();
+      updateSummary();
+    });
+  });
+
+  updateSummary();
+}
+
+function updateDayTotal(day) {
+  const entry = data[day] || {};
+  const totalMin = entry.inicio && entry.fin
+    ? Math.max(0, timeToMinutes(entry.fin) - timeToMinutes(entry.inicio)) : 0;
+  const el = document.getElementById(`total_${day}`);
+  if (el) {
+    el.textContent = totalMin > 0 ? minutesToHHMM(totalMin) : '–';
+    el.className = `day-total ${totalMin > 0 ? (entry.holiday ? 'is-holiday-h' : 'has-hours') : ''}`;
+  }
+}
+
+function updateSummary() {
+  data = loadMonth(currentMonth);
+  const target = parseInt(document.getElementById('targetHours').value) || 160;
+  let totalMin = 0, festivasMin = 0, daysCount = 0;
+
+  Object.entries(data).forEach(([day, entry]) => {
+    if (entry.inicio && entry.fin) {
+      const m = Math.max(0, timeToMinutes(entry.fin) - timeToMinutes(entry.inicio));
+      totalMin += m;
+      daysCount++;
+      if (entry.holiday) festivasMin += m;
+    }
+  });
+
+  const targetMin = target * 60;
+  const extraMin = totalMin - targetMin;
+  const pct = Math.min(100, Math.round((totalMin / targetMin) * 100));
+  const remainMin = Math.max(0, targetMin - totalMin);
+
+  document.getElementById('sumTotal').textContent = minutesToHHMM(totalMin);
+  document.getElementById('sumDays').textContent = `${daysCount} día${daysCount !== 1 ? 's' : ''} con registro`;
+  document.getElementById('sumObjetivo').textContent = `${target}h`;
+  document.getElementById('sumExtra').textContent = totalMin > 0 ? minutesToSignedHHMM(extraMin) : '–';
+  document.getElementById('sumFestivas').textContent = minutesToHHMM(festivasMin);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressRemain').textContent = totalMin >= targetMin
+    ? `✓ Objetivo cumplido`
+    : `Faltan ${minutesToHHMM(remainMin)}`;
+}
+
+function renderAll() {
+  renderMonthNav();
+  renderDays();
+}
+
+// ─── TARGET HOURS INPUT ───
+document.getElementById('targetHours').addEventListener('change', e => {
+  saveTarget(currentMonth, e.target.value);
+  updateSummary();
+});
+
+// ─── EXPORT ───
+document.getElementById('exportBtn').addEventListener('click', () => {
+  data = loadMonth(currentMonth);
+  const target = loadTarget(currentMonth);
+  const days = getDaysInMonth(YEAR, currentMonth);
+  let totalMin = 0, festivasMin = 0;
+  let lines = [`REGISTRO DE HORAS — ${MONTHS[currentMonth].toUpperCase()} ${YEAR}\n${'─'.repeat(42)}\n`];
+  lines.push(`${'FECHA'.padEnd(12)}${'INICIO'.padEnd(8)}${'FIN'.padEnd(8)}TOTAL`);
+  lines.push('─'.repeat(36));
+
+  for (let d = 1; d <= days; d++) {
+    const entry = data[d] || {};
+    const totalMin2 = entry.inicio && entry.fin
+      ? Math.max(0, timeToMinutes(entry.fin) - timeToMinutes(entry.inicio)) : 0;
+    totalMin += totalMin2;
+    if (entry.holiday) festivasMin += totalMin2;
+    const dateStr = `${String(d).padStart(2,'0')}/${String(currentMonth+1).padStart(2,'0')}/${YEAR}`;
+    const flag = entry.holiday ? ' [F]' : '';
+    lines.push(`${dateStr.padEnd(12)}${(entry.inicio||'–').padEnd(8)}${(entry.fin||'–').padEnd(8)}${minutesToHHMM(totalMin2)}${flag}`);
+  }
+
+  const targetMin = target * 60;
+  const extraMin = totalMin - targetMin;
+  lines.push('─'.repeat(36));
+  lines.push(`\nHORAS LABORABLES:  ${target}h`);
+  lines.push(`TOTAL TRABAJADO:   ${minutesToHHMM(totalMin)}`);
+  lines.push(`HORAS EXTRA:       ${minutesToSignedHHMM(extraMin)}`);
+  lines.push(`HORAS FESTIVAS:    ${minutesToHHMM(festivasMin)}`);
+
+  document.getElementById('exportContent').textContent = lines.join('\n');
+  document.getElementById('exportModal').classList.add('open');
+});
+
+document.getElementById('closeModal').addEventListener('click', () => {
+  document.getElementById('exportModal').classList.remove('open');
+});
+document.getElementById('exportModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const text = document.getElementById('exportContent').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copiado!';
+    setTimeout(() => btn.textContent = '📋 Copiar', 2000);
+  });
+});
+
+// ─── PWA INSTALL ───
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+document.getElementById('installBtn').addEventListener('click', () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      document.getElementById('installBanner').classList.remove('show');
+      deferredPrompt = null;
+    });
+  }
+});
+
+// ─── SERVICE WORKER ───
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// ─── INIT ───
+currentMonth = new Date().getMonth();
+renderAll();
+</script>
+</body>
+</html>
