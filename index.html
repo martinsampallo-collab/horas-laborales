@@ -24,8 +24,9 @@
     --text: #e8edf2;
     --text2: #7a8fa0;
     --text3: #4a5f72;
-    --danger: #ff4757;
     --holiday: #ffd32a;
+    --weekend-bg: #1f1a2e;
+    --weekend-border: #6c3fd1;
     --mono: 'Space Mono', monospace;
     --sans: 'DM Sans', sans-serif;
     --radius: 12px;
@@ -56,18 +57,71 @@
     z-index: 100;
     backdrop-filter: blur(12px);
   }
+  .header-left { display: flex; flex-direction: column; gap: 1px; }
   header h1 {
     font-family: var(--mono);
-    font-size: 14px;
+    font-size: 13px;
     color: var(--accent);
     letter-spacing: 0.05em;
     text-transform: uppercase;
   }
+  .header-name {
+    font-size: 11px;
+    color: var(--text2);
+    font-weight: 500;
+  }
+  .header-name span { color: var(--text); font-weight: 600; }
   .header-year {
     font-family: var(--mono);
     font-size: 12px;
     color: var(--text3);
   }
+
+  /* ─── NAME SETUP ─── */
+  .name-setup {
+    background: linear-gradient(135deg, #0f2027, #1a2535);
+    border-bottom: 1px solid var(--accent);
+    padding: 14px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .name-setup.hidden { display: none; }
+  .name-setup input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+  }
+  .name-setup input:focus { outline: none; border-color: var(--accent); }
+  .name-setup input::placeholder { color: var(--text3); }
+  .name-setup button {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius);
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .name-edit-btn {
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+  .name-edit-btn:hover { color: var(--accent); }
 
   /* ─── MONTH NAV ─── */
   .month-nav {
@@ -99,17 +153,13 @@
     color: var(--bg);
     font-weight: 700;
   }
-  .month-btn:hover:not(.active) {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
 
   /* ─── SUMMARY CARDS ─── */
   .summary {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
-    padding: 14px 16px;
+    padding: 14px 16px 8px;
   }
   .summary-card {
     background: var(--surface);
@@ -129,6 +179,7 @@
   .summary-card.card-objetivo::before { background: var(--text3); }
   .summary-card.card-extra::before { background: var(--accent2); }
   .summary-card.card-festivas::before { background: var(--holiday); }
+  .summary-card.card-gastos::before { background: var(--accent); }
   .summary-card .label {
     font-size: 10px;
     font-weight: 600;
@@ -139,49 +190,40 @@
   }
   .summary-card .value {
     font-family: var(--mono);
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--text);
     line-height: 1;
   }
   .summary-card.card-extra .value { color: var(--accent2); }
   .summary-card.card-festivas .value { color: var(--holiday); }
+  .summary-card.card-gastos .value { color: var(--accent); }
   .summary-card .sub {
     font-size: 10px;
     color: var(--text3);
     margin-top: 4px;
   }
 
-  /* ─── HORAS LABORABLES SETTINGS ─── */
-  .settings-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 16px;
+  /* ─── PROGRESS BAR ─── */
+  .progress-wrap { padding: 0 16px 10px; }
+  .progress-bar-bg {
     background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    gap: 10px;
+    border-radius: 4px;
+    height: 4px;
+    overflow: hidden;
   }
-  .settings-row label {
-    font-size: 12px;
-    color: var(--text2);
-    font-weight: 500;
-    white-space: nowrap;
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--accent);
+    transition: width 0.4s ease;
   }
-  .settings-row input[type="number"] {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 14px;
-    padding: 6px 10px;
-    border-radius: var(--radius-sm);
-    width: 80px;
-    text-align: center;
-  }
-  .settings-row input[type="number"]:focus {
-    outline: none;
-    border-color: var(--accent);
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 4px;
   }
 
   /* ─── DAY LIST ─── */
@@ -191,93 +233,72 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text3);
-    padding: 14px 16px 8px;
+    padding: 6px 16px 8px;
   }
-
   .day-list {
     padding: 0 16px 100px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
 
+  /* ─── DAY CARD ─── */
   .day-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 12px 14px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .day-card-top {
     display: grid;
-    grid-template-columns: 56px 1fr 1fr 64px 28px;
+    grid-template-columns: 56px 1fr 1fr 60px 28px;
     gap: 8px;
     align-items: center;
-    transition: border-color 0.15s;
-    position: relative;
+    padding: 10px 12px;
   }
-  .day-card.has-data {
-    border-color: rgba(0,212,170,0.25);
-    background: linear-gradient(135deg, var(--surface), #131e2a);
+  .day-card-extra {
+    border-top: 1px solid var(--border);
+    padding: 8px 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
   }
-  .day-card.is-holiday {
-    border-color: rgba(255,211,42,0.3);
-    background: linear-gradient(135deg, var(--surface), #1a1a10);
-  }
-  .day-card.is-weekend {
-    opacity: 0.5;
-  }
-  .day-card.today {
-    border-color: var(--accent3);
-    box-shadow: 0 0 0 1px rgba(74,158,255,0.2);
-  }
+  .day-card-extra.hidden { display: none; }
 
-  .day-date {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text2);
-    line-height: 1.4;
+  .day-card.has-data { border-color: rgba(0,212,170,0.25); background: linear-gradient(135deg, var(--surface), #131e2a); }
+  .day-card.is-holiday { border-color: rgba(255,211,42,0.4) !important; background: linear-gradient(135deg, #1c1a0f, #1a1a10) !important; }
+  .day-card.is-weekend {
+    background: var(--weekend-bg) !important;
+    border-color: rgba(108,63,209,0.5) !important;
   }
-  .day-date .weekday {
-    font-size: 9px;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  .day-date .day-num {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-  }
+  .day-card.is-weekend .day-date .weekday { color: #a78bfa; }
+  .day-card.is-weekend .day-date .day-num { color: #c4b5fd; }
+  .day-card.today { border-color: var(--accent3) !important; box-shadow: 0 0 0 1px rgba(74,158,255,0.2); }
+
+  .day-date { font-family: var(--mono); font-size: 11px; color: var(--text2); line-height: 1.4; }
+  .day-date .weekday { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+  .day-date .day-num { font-size: 13px; font-weight: 700; color: var(--text); }
 
   .time-input {
     background: var(--surface2);
     border: 1px solid var(--border);
     color: var(--text);
     font-family: var(--mono);
-    font-size: 13px;
-    padding: 8px 6px;
+    font-size: 12px;
+    padding: 7px 4px;
     border-radius: var(--radius-sm);
     width: 100%;
     text-align: center;
     -webkit-appearance: none;
   }
-  .time-input:focus {
-    outline: none;
-    border-color: var(--accent);
-    background: #0f1923;
-  }
-  .time-input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(0.5);
-    width: 16px;
-  }
+  .time-input:focus { outline: none; border-color: var(--accent); background: #0f1923; }
+  .time-input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.4); width: 14px; }
 
-  .day-total {
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 700;
-    text-align: center;
-    color: var(--text3);
-  }
+  .day-total { font-family: var(--mono); font-size: 11px; font-weight: 700; text-align: center; color: var(--text3); }
   .day-total.has-hours { color: var(--accent); }
   .day-total.is-holiday-h { color: var(--holiday); }
+  .day-total.is-weekend-h { color: #a78bfa; }
 
   .holiday-btn {
     background: none;
@@ -286,20 +307,81 @@
     width: 26px;
     height: 26px;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 10px;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.15s;
     color: var(--text3);
   }
-  .holiday-btn.active {
-    background: rgba(255,211,42,0.15);
-    border-color: var(--holiday);
-    color: var(--holiday);
-  }
+  .holiday-btn.active { background: rgba(255,211,42,0.15); border-color: var(--holiday); color: var(--holiday); }
 
-  /* ─── FAB EXPORT ─── */
+  /* extra fields */
+  .extra-field {
+    flex: 1;
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .extra-field label { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
+  .extra-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    width: 100%;
+  }
+  .extra-input:focus { outline: none; border-color: var(--accent); }
+  .extra-input::placeholder { color: var(--text3); }
+  .extra-input.gastos-wrap { display: flex; gap: 4px; }
+  .gastos-row { display: flex; gap: 6px; align-items: center; width: 100%; }
+  .gastos-row input { flex: 1; }
+  .gastos-row input.amount { width: 70px; flex: 0 0 70px; font-family: var(--mono); }
+  .add-gasto-btn {
+    background: rgba(0,212,170,0.1);
+    border: 1px solid rgba(0,212,170,0.3);
+    color: var(--accent);
+    border-radius: 6px;
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .remove-gasto-btn {
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+  }
+  .gastos-list { display: flex; flex-direction: column; gap: 4px; width: 100%; margin-top: 2px; }
+  .expand-btn {
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-size: 10px;
+    cursor: pointer;
+    padding: 4px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+  }
+  .expand-btn:hover { color: var(--accent); }
+
+  /* ─── FAB ─── */
   .fab {
     position: fixed;
     bottom: 24px;
@@ -320,17 +402,14 @@
     transition: transform 0.15s, box-shadow 0.15s;
     z-index: 50;
   }
-  .fab:active {
-    transform: scale(0.96);
-    box-shadow: 0 2px 10px rgba(0,212,170,0.2);
-  }
+  .fab:active { transform: scale(0.96); }
 
   /* ─── MODAL ─── */
   .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.75);
     z-index: 200;
     align-items: flex-end;
   }
@@ -341,20 +420,12 @@
     border-radius: 20px 20px 0 0;
     padding: 20px;
     width: 100%;
-    max-height: 80dvh;
+    max-height: 82dvh;
     overflow-y: auto;
     animation: slideUp 0.25s ease;
   }
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-  }
-  .modal h2 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 16px;
-    color: var(--accent);
-  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--accent); }
   .export-section {
     background: var(--bg);
     border-radius: var(--radius);
@@ -367,11 +438,7 @@
     white-space: pre;
     overflow-x: auto;
   }
-  .modal-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-  }
+  .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
   .btn {
     flex: 1;
     padding: 13px;
@@ -413,30 +480,6 @@
     white-space: nowrap;
   }
 
-  /* ─── PROGRESS BAR ─── */
-  .progress-wrap {
-    padding: 0 16px 4px;
-  }
-  .progress-bar-bg {
-    background: var(--surface2);
-    border-radius: 4px;
-    height: 4px;
-    overflow: hidden;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    background: var(--accent);
-    transition: width 0.4s ease;
-  }
-  .progress-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    color: var(--text3);
-    margin-top: 4px;
-  }
-
   input[type="time"] { color-scheme: dark; }
   input[type="number"] { color-scheme: dark; }
 </style>
@@ -444,9 +487,21 @@
 <body>
 
 <header>
-  <h1>⏱ Registro Horas</h1>
-  <span class="header-year" id="currentYear">2026</span>
+  <div class="header-left">
+    <h1>⏱ Registro Horas</h1>
+    <div class="header-name" id="headerName" style="display:none">
+      <span id="headerNameText"></span>
+      <button class="name-edit-btn" id="nameEditBtn">editar</button>
+    </div>
+  </div>
+  <span class="header-year">2026</span>
 </header>
+
+<!-- NAME SETUP -->
+<div class="name-setup" id="nameSetup">
+  <input type="text" id="nameInput" placeholder="Tu nombre y apellido..." maxlength="40">
+  <button id="nameSaveBtn">Guardar</button>
+</div>
 
 <!-- INSTALL BANNER -->
 <div class="install-banner" id="installBanner">
@@ -460,12 +515,6 @@
 <!-- MONTH NAV -->
 <div class="month-nav" id="monthNav"></div>
 
-<!-- SETTINGS ROW -->
-<div class="settings-row">
-  <label>Horas laborables del mes:</label>
-  <input type="number" id="targetHours" value="160" min="1" max="300">
-</div>
-
 <!-- SUMMARY -->
 <div class="summary">
   <div class="summary-card card-total">
@@ -475,8 +524,8 @@
   </div>
   <div class="summary-card card-objetivo">
     <div class="label">Objetivo</div>
-    <div class="value" id="sumObjetivo">160h</div>
-    <div class="sub">Horas laborables</div>
+    <div class="value" id="sumObjetivo">–</div>
+    <div class="sub" id="sumObjetivoSub">días laborables × 8h</div>
   </div>
   <div class="summary-card card-extra">
     <div class="label">Horas extra</div>
@@ -484,9 +533,14 @@
     <div class="sub">vs. objetivo</div>
   </div>
   <div class="summary-card card-festivas">
-    <div class="label">H. festivas</div>
+    <div class="label">H. festivas/finde</div>
     <div class="value" id="sumFestivas">0:00</div>
-    <div class="sub">En días festivos</div>
+    <div class="sub">En festivos y fines de semana</div>
+  </div>
+  <div class="summary-card card-gastos" style="grid-column: span 2;">
+    <div class="label">Total gastos del mes</div>
+    <div class="value" id="sumGastos">0,00 €</div>
+    <div class="sub" id="sumGastosSub">0 gastos registrados</div>
   </div>
 </div>
 
@@ -497,7 +551,7 @@
   </div>
   <div class="progress-label">
     <span id="progressPct">0%</span>
-    <span id="progressRemain">Faltan 160h</span>
+    <span id="progressRemain">Faltan –</span>
   </div>
 </div>
 
@@ -529,6 +583,8 @@
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const WEEKDAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const YEAR = 2026;
+const RATE_EXTRA = 15;    // €/h horas extra normales
+const RATE_FESTIVO = 20;  // €/h horas festivo/finde
 
 let currentMonth = new Date().getMonth();
 let data = {};
@@ -539,15 +595,9 @@ function loadMonth(m) {
   try { return JSON.parse(localStorage.getItem(storageKey(m)) || '{}'); }
   catch { return {}; }
 }
-function saveMonth(m, d) {
-  localStorage.setItem(storageKey(m), JSON.stringify(d));
-}
-function loadTarget(m) {
-  return parseInt(localStorage.getItem(`target_${YEAR}_${m}`) || '160');
-}
-function saveTarget(m, v) {
-  localStorage.setItem(`target_${YEAR}_${m}`, v);
-}
+function saveMonth(m, d) { localStorage.setItem(storageKey(m), JSON.stringify(d)); }
+function loadName() { return localStorage.getItem('worker_name') || ''; }
+function saveName(n) { localStorage.setItem('worker_name', n); }
 
 // ─── TIME UTILS ───
 function timeToMinutes(t) {
@@ -568,19 +618,57 @@ function minutesToSignedHHMM(min) {
   const m = abs % 60;
   return `${sign}${h}:${String(m).padStart(2,'0')}`;
 }
-function getDaysInMonth(year, month) {
-  return new Date(year, month + 1, 0).getDate();
-}
-function isWeekend(year, month, day) {
-  const d = new Date(year, month, day).getDay();
-  return d === 0 || d === 6;
-}
+function getDaysInMonth(year, month) { return new Date(year, month + 1, 0).getDate(); }
+function isWeekend(year, month, day) { const d = new Date(year, month, day).getDay(); return d === 0 || d === 6; }
 function isToday(year, month, day) {
   const t = new Date();
   return t.getFullYear() === year && t.getMonth() === month && t.getDate() === day;
 }
+function formatEur(n) {
+  return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
 
-// ─── RENDER MONTH NAV ───
+// ─── NAME ───
+function initName() {
+  const name = loadName();
+  if (name) {
+    document.getElementById('nameSetup').classList.add('hidden');
+    document.getElementById('headerName').style.display = 'flex';
+    document.getElementById('headerNameText').textContent = name;
+  } else {
+    document.getElementById('nameSetup').classList.remove('hidden');
+    document.getElementById('headerName').style.display = 'none';
+  }
+}
+document.getElementById('nameSaveBtn').addEventListener('click', () => {
+  const val = document.getElementById('nameInput').value.trim();
+  if (!val) return;
+  saveName(val);
+  initName();
+});
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('nameSaveBtn').click();
+});
+document.getElementById('nameEditBtn').addEventListener('click', () => {
+  document.getElementById('nameSetup').classList.remove('hidden');
+  document.getElementById('nameInput').value = loadName();
+  document.getElementById('nameInput').focus();
+});
+
+// ─── WORKING DAYS ───
+function calcWorkingDays(year, month, holidayData) {
+  const days = getDaysInMonth(year, month);
+  let count = 0;
+  for (let d = 1; d <= days; d++) {
+    const dow = new Date(year, month, d).getDay();
+    const isWknd = dow === 0 || dow === 6;
+    const entry = holidayData[d] || {};
+    if (!isWknd && !entry.holiday) count++;
+  }
+  return count;
+}
+
+// ─── MONTH NAV ───
 function renderMonthNav() {
   const nav = document.getElementById('monthNav');
   nav.innerHTML = MONTHS.map((m, i) =>
@@ -595,47 +683,132 @@ function renderMonthNav() {
   });
 }
 
+// ─── RENDER GASTOS ───
+function renderGastos(day, gastos, container) {
+  container.innerHTML = '';
+  (gastos || []).forEach((g, i) => {
+    const row = document.createElement('div');
+    row.className = 'gastos-row';
+    row.innerHTML = `
+      <input class="extra-input" placeholder="Descripción" value="${g.desc || ''}" data-gi="${i}" data-gf="desc">
+      <input class="extra-input amount" type="number" placeholder="€" step="0.01" min="0" value="${g.amount || ''}" data-gi="${i}" data-gf="amount">
+      <button class="remove-gasto-btn" data-gi="${i}">×</button>
+    `;
+    container.appendChild(row);
+  });
+
+  // add button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-gasto-btn';
+  addBtn.textContent = '+';
+  addBtn.addEventListener('click', () => {
+    if (!data[day]) data[day] = {};
+    if (!data[day].gastos) data[day].gastos = [];
+    data[day].gastos.push({ desc: '', amount: '' });
+    saveMonth(currentMonth, data);
+    renderGastos(day, data[day].gastos, container);
+    updateSummary();
+  });
+  container.appendChild(addBtn);
+
+  // events
+  container.querySelectorAll('[data-gf]').forEach(inp => {
+    inp.addEventListener('change', e => {
+      const gi = +e.target.dataset.gi;
+      const field = e.target.dataset.gf;
+      if (!data[day]) data[day] = {};
+      if (!data[day].gastos) data[day].gastos = [];
+      if (!data[day].gastos[gi]) data[day].gastos[gi] = {};
+      data[day].gastos[gi][field] = e.target.value;
+      saveMonth(currentMonth, data);
+      updateSummary();
+    });
+  });
+  container.querySelectorAll('.remove-gasto-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const gi = +e.target.dataset.gi;
+      if (!data[day]) return;
+      data[day].gastos.splice(gi, 1);
+      saveMonth(currentMonth, data);
+      renderGastos(day, data[day].gastos, container);
+      updateSummary();
+    });
+  });
+}
+
 // ─── RENDER DAYS ───
 function renderDays() {
   data = loadMonth(currentMonth);
-  const target = loadTarget(currentMonth);
-  document.getElementById('targetHours').value = target;
-
   const days = getDaysInMonth(YEAR, currentMonth);
   const list = document.getElementById('dayList');
   document.getElementById('sectionTitle').textContent = `${MONTHS[currentMonth]} ${YEAR}`;
-
   list.innerHTML = '';
+
   for (let d = 1; d <= days; d++) {
-    const key = `${d}`;
-    const entry = data[key] || {};
+    const entry = data[d] || {};
     const weekend = isWeekend(YEAR, currentMonth, d);
     const today = isToday(YEAR, currentMonth, d);
     const holiday = entry.holiday || false;
     const inicio = entry.inicio || '';
     const fin = entry.fin || '';
+    const lugar = entry.lugar || '';
     const totalMin = inicio && fin ? Math.max(0, timeToMinutes(fin) - timeToMinutes(inicio)) : 0;
     const totalStr = totalMin > 0 ? minutesToHHMM(totalMin) : '–';
+    const weekday = WEEKDAYS[new Date(YEAR, currentMonth, d).getDay()];
+    const hasExtra = lugar || (entry.gastos && entry.gastos.length > 0);
 
-    const dateObj = new Date(YEAR, currentMonth, d);
-    const weekday = WEEKDAYS[dateObj.getDay()];
+    const totalClass = totalMin > 0 ? (holiday ? 'is-holiday-h' : weekend ? 'is-weekend-h' : 'has-hours') : '';
 
     const card = document.createElement('div');
     card.className = `day-card${totalMin > 0 ? ' has-data' : ''}${holiday ? ' is-holiday' : ''}${weekend ? ' is-weekend' : ''}${today ? ' today' : ''}`;
     card.innerHTML = `
-      <div class="day-date">
-        <div class="weekday">${weekday}</div>
-        <div class="day-num">${String(d).padStart(2,'0')}</div>
+      <div class="day-card-top">
+        <div class="day-date">
+          <div class="weekday">${weekday}</div>
+          <div class="day-num">${String(d).padStart(2,'0')}</div>
+        </div>
+        <input type="time" class="time-input" value="${inicio}" data-day="${d}" data-field="inicio">
+        <input type="time" class="time-input" value="${fin}" data-day="${d}" data-field="fin">
+        <div class="day-total ${totalClass}" id="total_${d}">${totalStr}</div>
+        <button class="holiday-btn ${holiday ? 'active' : ''}" data-day="${d}" title="Marcar festivo">F</button>
       </div>
-      <input type="time" class="time-input" value="${inicio}" placeholder="Inicio" data-day="${d}" data-field="inicio">
-      <input type="time" class="time-input" value="${fin}" placeholder="Fin" data-day="${d}" data-field="fin">
-      <div class="day-total ${totalMin > 0 ? (holiday ? 'is-holiday-h' : 'has-hours') : ''}" id="total_${d}">${totalStr}</div>
-      <button class="holiday-btn ${holiday ? 'active' : ''}" data-day="${d}" title="Festivo">F</button>
+      <button class="expand-btn" data-day="${d}">
+        <span>${hasExtra ? '▾' : '▸'}</span>
+        <span id="expandLabel_${d}">${hasExtra ? lugar || 'Ver detalles' : '+ lugar / gastos'}</span>
+      </button>
+      <div class="day-card-extra${hasExtra ? '' : ' hidden'}" id="extra_${d}">
+        <div class="extra-field" style="min-width:100%">
+          <label>Lugar de trabajo</label>
+          <input class="extra-input" placeholder="Ej: Oficina central, Madrid..." value="${lugar}" data-day="${d}" data-field="lugar">
+        </div>
+        <div class="extra-field" style="min-width:100%">
+          <label>Gastos</label>
+          <div class="gastos-list" id="gastos_${d}"></div>
+        </div>
+      </div>
     `;
     list.appendChild(card);
+
+    // render gastos
+    renderGastos(d, entry.gastos || [], card.querySelector(`#gastos_${d}`));
+
+    // expand toggle
+    card.querySelector('.expand-btn').addEventListener('click', e => {
+      const day = +e.currentTarget.dataset.day;
+      const extraEl = document.getElementById(`extra_${day}`);
+      const labelEl = document.getElementById(`expandLabel_${day}`);
+      const isHidden = extraEl.classList.toggle('hidden');
+      e.currentTarget.querySelector('span').textContent = isHidden ? '▸' : '▾';
+      if (isHidden) {
+        const en = data[day] || {};
+        labelEl.textContent = en.lugar || (en.gastos && en.gastos.length ? 'Ver detalles' : '+ lugar / gastos');
+      } else {
+        labelEl.textContent = 'Ocultar';
+      }
+    });
   }
 
-  // Events
+  // time inputs
   list.querySelectorAll('.time-input').forEach(inp => {
     inp.addEventListener('change', e => {
       const day = e.target.dataset.day;
@@ -647,6 +820,8 @@ function renderDays() {
       updateSummary();
     });
   });
+
+  // holiday btn
   list.querySelectorAll('.holiday-btn').forEach(btn => {
     btn.addEventListener('click', e => {
       const day = e.target.dataset.day;
@@ -658,6 +833,18 @@ function renderDays() {
     });
   });
 
+  // lugar input
+  list.querySelectorAll('[data-field="lugar"]').forEach(inp => {
+    inp.addEventListener('change', e => {
+      const day = e.target.dataset.day;
+      if (!data[day]) data[day] = {};
+      data[day].lugar = e.target.value;
+      saveMonth(currentMonth, data);
+      const labelEl = document.getElementById(`expandLabel_${day}`);
+      if (labelEl) labelEl.textContent = 'Ocultar';
+    });
+  });
+
   updateSummary();
 }
 
@@ -666,97 +853,118 @@ function updateDayTotal(day) {
   const totalMin = entry.inicio && entry.fin
     ? Math.max(0, timeToMinutes(entry.fin) - timeToMinutes(entry.inicio)) : 0;
   const el = document.getElementById(`total_${day}`);
-  if (el) {
-    el.textContent = totalMin > 0 ? minutesToHHMM(totalMin) : '–';
-    el.className = `day-total ${totalMin > 0 ? (entry.holiday ? 'is-holiday-h' : 'has-hours') : ''}`;
-  }
+  if (!el) return;
+  el.textContent = totalMin > 0 ? minutesToHHMM(totalMin) : '–';
+  const wknd = isWeekend(YEAR, currentMonth, +day);
+  el.className = `day-total ${totalMin > 0 ? (entry.holiday ? 'is-holiday-h' : wknd ? 'is-weekend-h' : 'has-hours') : ''}`;
 }
 
 function updateSummary() {
   data = loadMonth(currentMonth);
-  const target = parseInt(document.getElementById('targetHours').value) || 160;
-  let totalMin = 0, festivasMin = 0, daysCount = 0;
+  let totalMin = 0, festivasMin = 0, weekendMin = 0, daysCount = 0;
+  let totalGastos = 0, gastosCount = 0;
 
-  Object.entries(data).forEach(([day, entry]) => {
+  const days = getDaysInMonth(YEAR, currentMonth);
+  for (let d = 1; d <= days; d++) {
+    const entry = data[d] || {};
     if (entry.inicio && entry.fin) {
       const m = Math.max(0, timeToMinutes(entry.fin) - timeToMinutes(entry.inicio));
       totalMin += m;
       daysCount++;
       if (entry.holiday) festivasMin += m;
+      if (isWeekend(YEAR, currentMonth, d)) weekendMin += m;
     }
-  });
+    (entry.gastos || []).forEach(g => {
+      const amt = parseFloat(g.amount) || 0;
+      if (amt > 0) { totalGastos += amt; gastosCount++; }
+    });
+  }
 
-  const targetMin = target * 60;
+  const workingDays = calcWorkingDays(YEAR, currentMonth, data);
+  const targetMin = workingDays * 8 * 60;
   const extraMin = totalMin - targetMin;
-  const pct = Math.min(100, Math.round((totalMin / targetMin) * 100));
+  const pct = targetMin > 0 ? Math.min(100, Math.round((totalMin / targetMin) * 100)) : 0;
   const remainMin = Math.max(0, targetMin - totalMin);
+  const specialMin = festivasMin + weekendMin;
 
   document.getElementById('sumTotal').textContent = minutesToHHMM(totalMin);
   document.getElementById('sumDays').textContent = `${daysCount} día${daysCount !== 1 ? 's' : ''} con registro`;
-  document.getElementById('sumObjetivo').textContent = `${target}h`;
+  document.getElementById('sumObjetivo').textContent = `${workingDays * 8}h`;
+  document.getElementById('sumObjetivoSub').textContent = `${workingDays} días × 8h`;
   document.getElementById('sumExtra').textContent = totalMin > 0 ? minutesToSignedHHMM(extraMin) : '–';
-  document.getElementById('sumFestivas').textContent = minutesToHHMM(festivasMin);
+  document.getElementById('sumFestivas').textContent = minutesToHHMM(specialMin);
+  document.getElementById('sumGastos').textContent = formatEur(totalGastos);
+  document.getElementById('sumGastosSub').textContent = `${gastosCount} gasto${gastosCount !== 1 ? 's' : ''} registrado${gastosCount !== 1 ? 's' : ''}`;
   document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('progressPct').textContent = pct + '%';
   document.getElementById('progressRemain').textContent = totalMin >= targetMin
-    ? `✓ Objetivo cumplido`
-    : `Faltan ${minutesToHHMM(remainMin)}`;
+    ? `✓ Objetivo cumplido` : `Faltan ${minutesToHHMM(remainMin)}`;
 }
 
-function renderAll() {
-  renderMonthNav();
-  renderDays();
-}
-
-// ─── TARGET HOURS INPUT ───
-document.getElementById('targetHours').addEventListener('change', e => {
-  saveTarget(currentMonth, e.target.value);
-  updateSummary();
-});
+function renderAll() { renderMonthNav(); renderDays(); }
 
 // ─── EXPORT ───
 document.getElementById('exportBtn').addEventListener('click', () => {
   data = loadMonth(currentMonth);
-  const target = loadTarget(currentMonth);
+  const name = loadName() || '(sin nombre)';
+  const workingDays = calcWorkingDays(YEAR, currentMonth, data);
+  const target = workingDays * 8;
   const days = getDaysInMonth(YEAR, currentMonth);
-  let totalMin = 0, festivasMin = 0;
-  let lines = [`REGISTRO DE HORAS — ${MONTHS[currentMonth].toUpperCase()} ${YEAR}\n${'─'.repeat(42)}\n`];
-  lines.push(`${'FECHA'.padEnd(12)}${'INICIO'.padEnd(8)}${'FIN'.padEnd(8)}TOTAL`);
-  lines.push('─'.repeat(36));
+  let totalMin = 0, festivasMin = 0, weekendMin = 0, extraMin = 0;
+  let totalGastos = 0;
+
+  let lines = [
+    `REGISTRO DE HORAS — ${MONTHS[currentMonth].toUpperCase()} ${YEAR}`,
+    `Trabajador: ${name}`,
+    '─'.repeat(44), ''
+  ];
+  lines.push(`${'FECHA'.padEnd(11)}${'DÍA'.padEnd(5)}${'INICIO'.padEnd(7)}${'FIN'.padEnd(7)}${'TOTAL'.padEnd(7)}LUGAR`);
+  lines.push('─'.repeat(44));
 
   for (let d = 1; d <= days; d++) {
     const entry = data[d] || {};
-    const totalMin2 = entry.inicio && entry.fin
-      ? Math.max(0, timeToMinutes(entry.fin) - timeToMinutes(entry.inicio)) : 0;
-    totalMin += totalMin2;
-    if (entry.holiday) festivasMin += totalMin2;
+    const min = entry.inicio && entry.fin ? Math.max(0, timeToMinutes(entry.fin) - timeToMinutes(entry.inicio)) : 0;
+    totalMin += min;
+    const wknd = isWeekend(YEAR, currentMonth, d);
+    if (entry.holiday) festivasMin += min;
+    if (wknd) weekendMin += min;
     const dateStr = `${String(d).padStart(2,'0')}/${String(currentMonth+1).padStart(2,'0')}/${YEAR}`;
-    const flag = entry.holiday ? ' [F]' : '';
-    lines.push(`${dateStr.padEnd(12)}${(entry.inicio||'–').padEnd(8)}${(entry.fin||'–').padEnd(8)}${minutesToHHMM(totalMin2)}${flag}`);
+    const wd = WEEKDAYS[new Date(YEAR, currentMonth, d).getDay()];
+    const flag = entry.holiday ? '[F]' : wknd ? '[W]' : '   ';
+    const lugar = entry.lugar || '';
+    lines.push(`${dateStr.padEnd(11)}${(wd+flag).padEnd(9)}${(entry.inicio||'–').padEnd(7)}${(entry.fin||'–').padEnd(7)}${minutesToHHMM(min).padEnd(7)}${lugar}`);
+
+    // gastos
+    (entry.gastos || []).forEach(g => {
+      const amt = parseFloat(g.amount) || 0;
+      if (amt > 0 || g.desc) {
+        totalGastos += amt;
+        lines.push(`  └ Gasto: ${g.desc || '–'}  ${amt > 0 ? formatEur(amt) : ''}`);
+      }
+    });
   }
 
   const targetMin = target * 60;
-  const extraMin = totalMin - targetMin;
-  lines.push('─'.repeat(36));
-  lines.push(`\nHORAS LABORABLES:  ${target}h`);
-  lines.push(`TOTAL TRABAJADO:   ${minutesToHHMM(totalMin)}`);
-  lines.push(`HORAS EXTRA:       ${minutesToSignedHHMM(extraMin)}`);
-  lines.push(`HORAS FESTIVAS:    ${minutesToHHMM(festivasMin)}`);
+  extraMin = totalMin - targetMin;
+  const specialMin = festivasMin + weekendMin;
+
+  lines.push('─'.repeat(44));
+  lines.push('');
+  lines.push(`DÍAS LABORABLES:     ${workingDays} días`);
+  lines.push(`HORAS OBJETIVO:      ${target}h`);
+  lines.push(`TOTAL TRABAJADO:     ${minutesToHHMM(totalMin)}`);
+  lines.push(`HORAS EXTRA:         ${minutesToSignedHHMM(extraMin)}`);
+  lines.push(`H. FESTIVAS/FINDE:   ${minutesToHHMM(specialMin)}`);
+  lines.push(`TOTAL GASTOS:        ${formatEur(totalGastos)}`);
 
   document.getElementById('exportContent').textContent = lines.join('\n');
   document.getElementById('exportModal').classList.add('open');
 });
 
-document.getElementById('closeModal').addEventListener('click', () => {
-  document.getElementById('exportModal').classList.remove('open');
-});
-document.getElementById('exportModal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
-});
-
+document.getElementById('closeModal').addEventListener('click', () => document.getElementById('exportModal').classList.remove('open'));
+document.getElementById('exportModal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
 document.getElementById('copyBtn').addEventListener('click', () => {
-  const text = document.getElementById('exportContent').textContent;
-  navigator.clipboard.writeText(text).then(() => {
+  navigator.clipboard.writeText(document.getElementById('exportContent').textContent).then(() => {
     const btn = document.getElementById('copyBtn');
     btn.textContent = '✓ Copiado!';
     setTimeout(() => btn.textContent = '📋 Copiar', 2000);
@@ -781,11 +989,10 @@ document.getElementById('installBtn').addEventListener('click', () => {
 });
 
 // ─── SERVICE WORKER ───
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
-}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
 // ─── INIT ───
+initName();
 currentMonth = new Date().getMonth();
 renderAll();
 </script>
